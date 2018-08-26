@@ -12,6 +12,32 @@ namespace mtalloc
 
         private static ushort _firstNodeAddr = 0; // First node's address.
 
+        /// <returns>
+        /// Return address of first free space to store a Node object
+        /// or 0, if no space left.
+        /// </returns>
+        private static ushort GetFreeNodeAddr()
+        {
+            Debug.Assert(_maxNodeCount > 0);
+            Debug.Assert(_firstNodeAddr == Mem.AddrFirst);
+
+            for (ushort i = 0; i < _maxNodeCount; ++i)
+            {
+                ushort addr = (ushort)(Mem.AddrFirst + i * Node.NodeLen),
+                    firstWord = Mem.LoadWord(addr);
+
+                if (firstWord == Node.FreeFlagWord)
+                {
+                    return addr; // Found free space for a node.
+                }
+            }
+            return 0; // No space for a node found.
+        }
+
+        /// <summary>
+        /// Occupy heap space with one Node object that reserves the whole rest
+        /// of heap space as one single unallocated node.
+        /// </summary>
         public static void Init()
         {
             ushort firstBlockAddr, firstBlockLen;
@@ -39,31 +65,6 @@ namespace mtalloc
             };
 
             Node.Store(_firstNodeAddr, firstNode);
-        }
-
-        public static ushort GetFreeNodeAddr()
-        {
-            for (ushort i = 0; i < _maxNodeCount; ++i)
-            {
-                ushort addr = (ushort)(Mem.AddrFirst + i * Node.NodeLen),
-                    firstWord = Mem.LoadWord(addr);
-
-                if (firstWord == Node.FreeFlagWord)
-                {
-                    return addr; // Found free space for a node.
-                }
-            }
-
-            // No free space for a node found, try to increase node space:
-
-            if(_firstNodeAddr == 0)
-            {
-                Init(); // Initialize node space and first node.
-
-                return _firstNodeAddr;
-            }
-
-            throw new NotImplementedException(); // MT_TODO: TEST: Implement!
         }
     }
 }

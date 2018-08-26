@@ -47,11 +47,45 @@ namespace mtalloc
             return 0; // No space for a node found.
         }
 
+        private static ushort GetFirstBlockNodeAddr()
+        {
+            Debug.Assert(_maxNodeCount > 0);
+            Debug.Assert(_firstNodeAddr == Mem.AddrFirst);
+
+            ushort minBlockAddr = 0xFFFF,//ushort.MaxValue,
+                retVal = 0;
+
+            for (ushort i = 0; i < _maxNodeCount; ++i)
+            {
+                ushort addr = (ushort)(_firstNodeAddr + i * Node.NodeLen),
+                    firstWord = Mem.LoadWord(addr);
+                Node node;
+
+                if (firstWord == Node.FreeFlagWord)
+                {
+                    continue; // Free space for a node.
+                }
+
+                node = Node.Load(addr);
+                if(node.BlockAddr < minBlockAddr)
+                {
+                    minBlockAddr = node.BlockAddr;
+                    retVal = addr;
+                }
+            }
+            Debug.Assert(minBlockAddr < 0xFFFF);//ushort.MaxValue);
+            Debug.Assert(
+                minBlockAddr == _firstNodeAddr + Node.NodeLen * _maxNodeCount);
+            return retVal;
+        }
+
         private static ushort CreateFreeNodeAddr()
         {
             Debug.Assert(GetFreeNodeAddr() == 0);
 
-            var firstBlockNode = ;
+            var firstBlockNodeAddr = GetFirstBlockNodeAddr();
+            var firstBlockNode = Node.Load(firstBlockNodeAddr);
+            ushort freeNodeAddr;
 
             // Is first block's node unallocated?
             //
@@ -60,9 +94,23 @@ namespace mtalloc
                 return 0;
             }
 
-            // Is first block's length equal or longer than a node's length?
+            // Is first block's length equal or longer than a node's length
+            // plus one (at least one byte must be on stack for new node to
+            // be created for this to makes sense..)?
+            //
+            if(firstBlockNode.BlockLen < Node.NodeLen + 1)
+            {
+                return 0;
+            }
 
-            return 0;
+            freeNodeAddr = firstBlockNode.BlockAddr;
+            firstBlockNode.BlockAddr += Node.NodeLen;
+            firstBlockNode.BlockLen -= Node.NodeLen;
+            ++_maxNodeCount;
+            MarkNodeSpaceAsFree(freeNodeAddr);
+
+            Debug.Assert(GetFreeNodeAddr() == freeNodeAddr);
+            return freeNodeAddr;
         }
 
         /// <summary>

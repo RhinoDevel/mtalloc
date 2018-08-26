@@ -12,6 +12,9 @@ namespace mtalloc
 
         private static ushort _firstNodeAddr = 0; // First node's address.
 
+        /// <summary>
+        /// Mark node's space in memory at given position as free for reuse.
+        /// </summary>
         private static void MarkNodeSpaceAsFree(ushort nodeAddr)
         {
             Debug.Assert(nodeAddr >= _firstNodeAddr);
@@ -33,7 +36,7 @@ namespace mtalloc
 
             for (ushort i = 0; i < _maxNodeCount; ++i)
             {
-                ushort addr = (ushort)(Mem.AddrFirst + i * Node.NodeLen),
+                ushort addr = (ushort)(_firstNodeAddr + i * Node.NodeLen),
                     firstWord = Mem.LoadWord(addr);
 
                 if (firstWord == Node.FreeFlagWord)
@@ -42,6 +45,24 @@ namespace mtalloc
                 }
             }
             return 0; // No space for a node found.
+        }
+
+        private static ushort CreateFreeNodeAddr()
+        {
+            Debug.Assert(GetFreeNodeAddr() == 0);
+
+            var firstBlockNode = ;
+
+            // Is first block's node unallocated?
+            //
+            if(firstBlockNode.IsAllocated != 0)
+            {
+                return 0;
+            }
+
+            // Is first block's length equal or longer than a node's length?
+
+            return 0;
         }
 
         /// <summary>

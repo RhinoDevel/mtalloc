@@ -3,6 +3,10 @@ namespace mtalloc
 {
     public class Node
     {
+        public const ushort FreeFlagWord = 0xFFFF;
+
+        public const byte NodeLen = 9;
+        //
         public ushort LastNodeAddr { get; set; }
         public ushort BlockAddr { get; set; }
         public ushort BlockLen { get; set; }

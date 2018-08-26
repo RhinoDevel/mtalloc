@@ -12,6 +12,16 @@ namespace mtalloc
 
         private static ushort _firstNodeAddr = 0; // First node's address.
 
+        private static void MarkNodeSpaceAsFree(ushort nodeAddr)
+        {
+            Debug.Assert(nodeAddr >= _firstNodeAddr);
+            Debug.Assert(
+                nodeAddr <= (_firstNodeAddr + _maxNodeCount * Node.NodeLen));
+            Debug.Assert((nodeAddr - _firstNodeAddr) % Node.NodeLen == 0);
+
+            Mem.StoreWord(nodeAddr, Node.FreeFlagWord);
+        }
+
         /// <returns>
         /// Return address of first free space to store a Node object
         /// or 0, if no space left.

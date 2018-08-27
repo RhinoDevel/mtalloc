@@ -117,7 +117,7 @@ namespace mtalloc
             return freeNodeAddr;
         }
 
-        /// <returns>Stored node's address.</returns>
+        /// <returns>Stored node's address or 0, if no space left.</returns>
         public static ushort Store(Node node)
         {
             var nodeAddr = GetFreeNodeAddr();
@@ -130,7 +130,6 @@ namespace mtalloc
                     return 0;
                 }
             }
-
             Node.Store(nodeAddr, node);
             return nodeAddr;
         }

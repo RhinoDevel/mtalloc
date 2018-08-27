@@ -117,6 +117,24 @@ namespace mtalloc
             return freeNodeAddr;
         }
 
+        /// <returns>Stored node's address.</returns>
+        public static ushort Store(Node node)
+        {
+            var nodeAddr = GetFreeNodeAddr();
+
+            if(nodeAddr == 0)
+            {
+                nodeAddr = CreateFreeNodeAddr();
+                if(nodeAddr == 0)
+                {
+                    return 0;
+                }
+            }
+
+            Node.Store(nodeAddr, node);
+            return nodeAddr;
+        }
+
         /// <summary>
         /// Occupy heap space with one Node object that reserves the whole rest
         /// of heap space as one single unallocated node.

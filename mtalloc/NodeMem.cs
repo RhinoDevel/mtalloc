@@ -12,14 +12,20 @@ namespace mtalloc
 
         public static ushort FirstNodeAddr = 0; // First node's address.
 
+        public static ushort GetFirstBlockAddr()
+        {
+            // First block begins behind last node.
+
+            return (ushort)(FirstNodeAddr + Node.NodeLen * _maxNodeCount);
+        }
+
         /// <summary>
         /// Mark node's space in memory at given position as free for reuse.
         /// </summary>
         private static void MarkNodeSpaceAsFree(ushort nodeAddr)
         {
             Debug.Assert(nodeAddr >= FirstNodeAddr);
-            Debug.Assert(
-                nodeAddr <= (FirstNodeAddr + _maxNodeCount * Node.NodeLen));
+            Debug.Assert(nodeAddr <= GetFirstBlockAddr());
             Debug.Assert((nodeAddr - FirstNodeAddr) % Node.NodeLen == 0);
 
             Mem.StoreWord(nodeAddr, Node.FreeFlagWord);
@@ -53,10 +59,7 @@ namespace mtalloc
             Debug.Assert(FirstNodeAddr == Mem.AddrFirst);
 
             ushort retVal = 0,
-                firstBlockAddr =
-                    (ushort)(FirstNodeAddr + Node.NodeLen * _maxNodeCount);
-                //
-                // First block begins behind last node.
+                firstBlockAddr = GetFirstBlockAddr();
 
             for (ushort i = 0; i < _maxNodeCount; ++i)
             {
@@ -132,7 +135,7 @@ namespace mtalloc
             // The first (and initially only) block will occupy the complete
             // last part of heap space after the first node's memory space:
             //
-            firstBlockAddr = (ushort)(FirstNodeAddr + Node.NodeLen);
+            firstBlockAddr = GetFirstBlockAddr();
             firstBlockLen = Mem.HeapLen - Node.NodeLen;
 
             firstNode = new Node

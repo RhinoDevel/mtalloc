@@ -10,9 +10,9 @@ namespace mtalloc
         //
         // How many nodes can currently be stored.
 
-        public static ushort FirstNodeAddr = 0; // First node's address.
+        private static ushort FirstNodeAddr = 0; // First node's address.
 
-        public static ushort GetFirstBlockAddr()
+        private static ushort GetFirstBlockAddr()
         {
             // First block begins behind last node.
 
@@ -132,6 +132,69 @@ namespace mtalloc
             }
             Node.Store(nodeAddr, node);
             return nodeAddr;
+        }
+
+        /// <returns>
+        /// Address of node with unallocated block of sufficient size to hold
+        /// given/wanted amount of bytes.
+        /// 
+        /// 0, if no such node was found.
+        /// </returns>
+        public static ushort GetAllocNodeAddr(ushort wantedLen)
+        {
+            ushort retVal = 0,
+                firstBlockAddr = NodeMem.GetFirstBlockAddr(),
+                blockLen = 0;
+            Node n = null;
+
+            for (ushort addr = NodeMem.FirstNodeAddr;
+                addr != 0;
+                addr = n.NextNodeAddr)
+            {
+                n = Node.Load(addr);
+
+                if (n.IsAllocated != 0)
+                {
+                    continue; // Node's block is already allocated.
+                }
+
+                if (n.BlockLen < wantedLen)
+                {
+                    continue; // Would not fit in node's block.
+                }
+
+                if (n.BlockAddr == firstBlockAddr)
+                {
+                    if (retVal == 0)
+                    {
+                        retVal = addr; // No better candidate found, yet.
+                        blockLen = n.BlockLen;
+                    }
+                    continue;
+                }
+
+                if (n.BlockLen == wantedLen)
+                {
+                    retVal = addr;
+                    break; // Fits perfectly. Found!
+                }
+
+                if (retVal == 0)
+                {
+                    retVal = addr;
+                    blockLen = n.BlockLen;
+                    continue; // No better candidate found, yet.
+                }
+
+                if (blockLen > n.BlockLen)
+                {
+                    // Would fit better than current best candidate.
+
+                    retVal = addr;
+                    blockLen = n.BlockLen;
+                }
+            }
+            return retVal;
         }
 
         /// <summary>

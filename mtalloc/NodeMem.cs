@@ -210,6 +210,55 @@ namespace mtalloc
             return retVal;
         }
 
+        ///<remarks>
+        /// Node at given address must be unallocated!
+        ///</remarks>
+        public static void MergeUnallocatedWithNextIfPossible(
+            ushort unallocatedNodeAddr)
+        {
+            var cur = Node.Load(unallocatedNodeAddr);
+            Node next = null;
+
+            Debug.Assert(cur.IsAllocated == 0);
+
+            if(cur.NextNodeAddr == 0)
+            {
+                return; // Nothing to do.
+            }
+
+            next = Node.Load(cur.NextNodeAddr);
+
+            Debug.Assert(cur.BlockAddr + cur.BlockLen == next.BlockAddr);
+
+            if(next.IsAllocated != 0)
+            {
+                return; // Not possible. Nothing to do.
+            }
+
+            if(next.NextNodeAddr != 0)
+            {
+                // Merge current with next node:
+
+                var nextNextNode = Node.Load(next.NextNodeAddr);
+
+                Debug.Assert(nextNextNode.LastNodeAddr == next.NextNodeAddr);
+                Debug.Assert(nextNextNode.IsAllocated == 1);
+                Debug.Assert(
+                    next.BlockAddr + next.BlockLen == nextNextNode.BlockAddr);
+
+                nextNextNode.LastNodeAddr = unallocatedNodeAddr;
+
+                Node.Store(next.NextNodeAddr, nextNextNode);
+            }
+
+            MarkNodeSpaceAsFree(cur.NextNodeAddr);
+
+            cur.NextNodeAddr = next.NextNodeAddr;
+            cur.BlockLen += next.BlockLen;
+
+            Node.Store(unallocatedNodeAddr, cur);
+        }
+
         /// <summary>
         /// Occupy heap space with one Node object that reserves the whole rest
         /// of heap space as one single unallocated node.

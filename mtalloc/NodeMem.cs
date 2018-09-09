@@ -67,9 +67,9 @@ namespace mtalloc
 
             for (ushort i = 0; i < _maxNodeCount; ++i)
             {
-                ushort addr = (ushort)(_firstNodeAddr + i * Node.NodeLen),
-                    firstWord = Mem.LoadWord(addr);
-                Node node;
+                var addr = (ushort)(_firstNodeAddr + i * Node.NodeLen);
+                var firstWord = Mem.LoadWord(addr);
+                Node node = null;
 
                 if (firstWord == Node.FreeFlagWord)
                 {

@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Diagnostics;
 
 namespace mtalloc
 {
@@ -24,9 +25,12 @@ namespace mtalloc
 
             n = Node.Load(nodeAddr);
 
+            Debug.Assert(n.IsAllocated == 0);
+
             if(n.BlockLen == wantedLen)
             {
                 n.IsAllocated = 1;
+                Node.Store(nodeAddr, n);
                 return n.BlockAddr;
             }
 
@@ -43,7 +47,9 @@ namespace mtalloc
                 return 0;
             }
 
+            n.BlockLen -= newNode.BlockLen;
             n.NextNodeAddr = newNodeAddr;
+            Node.Store(nodeAddr, n);
 
             if (newNode.NextNodeAddr != 0)
             {

@@ -1,4 +1,6 @@
 ﻿
+using System.Diagnostics;
+
 namespace mtalloc
 {
     public class Node
@@ -20,6 +22,8 @@ namespace mtalloc
 
             retVal.LastNodeAddr = Mem.LoadWord(addr);
             addr += 2;
+
+            Debug.Assert(retVal.LastNodeAddr != FreeFlagWord);
 
             retVal.BlockAddr = Mem.LoadWord(addr);
             addr += 2;

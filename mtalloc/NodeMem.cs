@@ -10,13 +10,16 @@ namespace mtalloc
         //
         // How many nodes can currently be stored.
 
-        private static ushort FirstNodeAddr = 0; // First node's address.
+        private static ushort _firstNodeAddr = 0; // First node's address.
 
         private static ushort GetFirstBlockAddr()
         {
+            Debug.Assert(_firstNodeAddr == Mem.AddrFirst);
+            Debug.Assert(_maxNodeCount > 0);
+
             // First block begins behind last node.
 
-            return (ushort)(FirstNodeAddr + Node.NodeLen * _maxNodeCount);
+            return (ushort)(_firstNodeAddr + Node.NodeLen * _maxNodeCount);
         }
 
         /// <summary>
@@ -24,9 +27,10 @@ namespace mtalloc
         /// </summary>
         private static void MarkNodeSpaceAsFree(ushort nodeAddr)
         {
-            Debug.Assert(nodeAddr >= FirstNodeAddr);
+            Debug.Assert(_firstNodeAddr == Mem.AddrFirst);
+            Debug.Assert(nodeAddr >= _firstNodeAddr);
             Debug.Assert(nodeAddr <= GetFirstBlockAddr());
-            Debug.Assert((nodeAddr - FirstNodeAddr) % Node.NodeLen == 0);
+            Debug.Assert((nodeAddr - _firstNodeAddr) % Node.NodeLen == 0);
 
             Mem.StoreWord(nodeAddr, Node.FreeFlagWord);
         }
@@ -38,11 +42,11 @@ namespace mtalloc
         private static ushort GetFreeNodeAddr()
         {
             Debug.Assert(_maxNodeCount > 0);
-            Debug.Assert(FirstNodeAddr == Mem.AddrFirst);
+            Debug.Assert(_firstNodeAddr == Mem.AddrFirst);
 
             for (ushort i = 0; i < _maxNodeCount; ++i)
             {
-                ushort addr = (ushort)(FirstNodeAddr + i * Node.NodeLen),
+                ushort addr = (ushort)(_firstNodeAddr + i * Node.NodeLen),
                     firstWord = Mem.LoadWord(addr);
 
                 if (firstWord == Node.FreeFlagWord)
@@ -53,17 +57,17 @@ namespace mtalloc
             return 0; // No space for a node found.
         }
 
-        private static ushort GetFirstBlockNodeAddr()
+        public static ushort GetBlockNodeAddr(ushort blockAddr)
         {
+            Debug.Assert(blockAddr > 0);
             Debug.Assert(_maxNodeCount > 0);
-            Debug.Assert(FirstNodeAddr == Mem.AddrFirst);
+            Debug.Assert(_firstNodeAddr == Mem.AddrFirst);
 
-            ushort retVal = 0,
-                firstBlockAddr = GetFirstBlockAddr();
+            ushort retVal = 0;
 
             for (ushort i = 0; i < _maxNodeCount; ++i)
             {
-                ushort addr = (ushort)(FirstNodeAddr + i * Node.NodeLen),
+                ushort addr = (ushort)(_firstNodeAddr + i * Node.NodeLen),
                     firstWord = Mem.LoadWord(addr);
                 Node node;
 
@@ -73,7 +77,7 @@ namespace mtalloc
                 }
 
                 node = Node.Load(addr);
-                if(node.BlockAddr == firstBlockAddr)
+                if(node.BlockAddr == blockAddr)
                 {
                     retVal = addr;
                     break;
@@ -81,6 +85,11 @@ namespace mtalloc
             }
             Debug.Assert(retVal > 0 && retVal < 0xFFFF);//ushort.MaxValue);
             return retVal;
+        }
+
+        private static ushort GetFirstBlockNodeAddr()
+        {
+            return GetBlockNodeAddr(GetFirstBlockAddr());
         }
 
         private static ushort CreateFreeNodeAddr()
@@ -120,6 +129,8 @@ namespace mtalloc
         /// <returns>Stored node's address or 0, if no space left.</returns>
         public static ushort Store(Node node)
         {
+            Debug.Assert(node != null);
+
             var nodeAddr = GetFreeNodeAddr();
 
             if(nodeAddr == 0)
@@ -142,12 +153,14 @@ namespace mtalloc
         /// </returns>
         public static ushort GetAllocNodeAddr(ushort wantedLen)
         {
+            Debug.Assert(wantedLen > 0);
+
             ushort retVal = 0,
                 firstBlockAddr = NodeMem.GetFirstBlockAddr(),
                 blockLen = 0;
             Node n = null;
 
-            for (ushort addr = NodeMem.FirstNodeAddr;
+            for (ushort addr = NodeMem._firstNodeAddr;
                 addr != 0;
                 addr = n.NextNodeAddr)
             {
@@ -203,14 +216,14 @@ namespace mtalloc
         /// </summary>
         public static void Init()
         {
+            Debug.Assert(_maxNodeCount == 0);
+            Debug.Assert(_firstNodeAddr == 0);
+
             ushort firstBlockAddr, firstBlockLen;
             Node firstNode;
 
-            Debug.Assert(_maxNodeCount == 0);
-            Debug.Assert(FirstNodeAddr == 0);
-
             _maxNodeCount = 1;
-            FirstNodeAddr = Mem.AddrFirst;
+            _firstNodeAddr = Mem.AddrFirst;
 
             // The first (and initially only) block will occupy the complete
             // last part of heap space after the first node's memory space:
@@ -227,7 +240,7 @@ namespace mtalloc
                 NextNodeAddr = 0
             };
 
-            Node.Store(FirstNodeAddr, firstNode);
+            Node.Store(_firstNodeAddr, firstNode);
         }
     }
 }

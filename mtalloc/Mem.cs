@@ -3,9 +3,9 @@ namespace mtalloc
 {
     public static class Mem
     {
-        private const ushort _memLen = 4096;
+        private const ushort _memLen = 120;
 
-        public const ushort AddrFirst = 3094;
+        public const ushort AddrFirst = 20;
         public const ushort HeapLen = _memLen - AddrFirst;
 
         private static readonly byte[] _mem = new byte[_memLen];

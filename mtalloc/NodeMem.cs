@@ -119,6 +119,7 @@ namespace mtalloc
             freeNodeAddr = firstBlockNode.BlockAddr;
             firstBlockNode.BlockAddr += Node.NodeLen;
             firstBlockNode.BlockLen -= Node.NodeLen;
+            Node.Store(firstBlockNodeAddr, firstBlockNode);
             ++_maxNodeCount;
             MarkNodeSpaceAsFree(freeNodeAddr);
 

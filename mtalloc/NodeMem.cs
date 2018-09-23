@@ -255,7 +255,7 @@ namespace mtalloc
 
                 var nextNextNode = Node.Load(next.NextNodeAddr);
 
-                Debug.Assert(nextNextNode.LastNodeAddr == next.NextNodeAddr);
+                Debug.Assert(nextNextNode.LastNodeAddr == cur.NextNodeAddr);
                 Debug.Assert(nextNextNode.IsAllocated == 1);
                 Debug.Assert(
                     next.BlockAddr + next.BlockLen == nextNextNode.BlockAddr);

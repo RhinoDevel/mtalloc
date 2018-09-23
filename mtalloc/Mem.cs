@@ -1,11 +1,14 @@
 ﻿
+using System;
+using System.Diagnostics;
+
 namespace mtalloc
 {
     public static class Mem
     {
-        private const ushort _memLen = 120;
+        private const ushort _memLen = 80;
 
-        public const ushort AddrFirst = 20;
+        public const ushort AddrFirst = 8;
         public const ushort HeapLen = _memLen - AddrFirst;
 
         private static readonly byte[] _mem = new byte[_memLen];
@@ -34,6 +37,43 @@ namespace mtalloc
         public static byte LoadByte(ushort addr)
         {
             return _mem[addr];
+        }
+
+        public static void Print()
+        {
+            const ushort columns = 16;
+
+            Debug.Assert(columns < 256);
+
+            {
+                var rowStrings = new string[columns];
+
+                for(ushort i = 0;i < columns;++i)
+                {
+                    rowStrings[i] = string.Format("{0:X2}", i);
+                }
+                Console.WriteLine(string.Join(" ", rowStrings));
+            }
+
+            for(ushort i = 0;i < _memLen; i += columns)
+            {
+                var rowAddr = i;
+                var rowStrings = new string[columns];
+
+                for(ushort j = 0;j < columns; ++j)
+                {
+                    var colAddr = rowAddr + j;
+
+                    if(colAddr == _memLen)
+                    {
+                        break;
+                    }
+                    Debug.Assert(colAddr <  _memLen);
+
+                    rowStrings[j] = string.Format("{0:X2}", _mem[colAddr]);
+                }
+                Console.WriteLine(string.Join(" ", rowStrings));
+            }
         }
     }
 }

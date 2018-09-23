@@ -124,14 +124,20 @@ namespace mtalloc
                 Mem.StoreByte(i, 170);
             }
 
-            var b = Alloc(20);
+            var b = Alloc(5);
 
-            for(ushort i = b;i < b + 20;++i)
+            for(ushort i = b;i < b + 5;++i)
             {
                 Mem.StoreByte(i, 187);
             }
             
-            var c = Alloc(30);
+            var c = Alloc(7);
+
+            for(ushort i = c;i < c + 7;++i)
+            {
+                Mem.StoreByte(i, 204);
+            }
+
             Free(b);
             Free(c);
             Free(a);

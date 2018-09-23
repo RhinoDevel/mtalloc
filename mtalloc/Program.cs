@@ -48,11 +48,22 @@ namespace mtalloc
 
         private static ushort Alloc(ushort wantedLen)
         {
-            ushort nodeAddr = NodeMem.GetAllocNodeAddr(wantedLen),
-                newNodeAddr = 0;
+            ushort newNodeAddr = 0,
+                nodeAddr = 0;
             Node n = null,
                 newNode = null;
+            
+            // Make sure that there is a node space available, first
+            // (and maybe frees space from first node, which must
+            // be done BEFORE first node may gets selected as
+            // "alloc" node):
+            //
+            if(!NodeMem.TryToReserveNodeSpace())
+            {
+                return 0; // No more space for another node available.
+            }
 
+            nodeAddr = NodeMem.GetAllocNodeAddr(wantedLen);
             if(nodeAddr == 0)
             {
                 return 0;
@@ -84,6 +95,8 @@ namespace mtalloc
             }
             n = Node.Load(nodeAddr);
             
+            Debug.Assert(n.BlockLen > newNode.BlockLen);
+
             n.BlockLen -= newNode.BlockLen;
             n.NextNodeAddr = newNodeAddr;
             Node.Store(nodeAddr, n);
@@ -105,8 +118,18 @@ namespace mtalloc
             NodeMem.Init();
             
             var a = Alloc(10);
+
+            for(ushort i = a;i < a + 10;++i)
+            {
+                Mem.StoreByte(i, 170);
+            }
+
             var b = Alloc(20);
 
+            for(ushort i = b;i < b + 20;++i)
+            {
+                Mem.StoreByte(i, 187);
+            }
             
             var c = Alloc(30);
             Free(b);

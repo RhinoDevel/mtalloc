@@ -127,21 +127,34 @@ namespace mtalloc
             return freeNodeAddr;
         }
 
+        private static ushort GetOrCreateFreeNodeSpace()
+        {
+            var nodeAddr = GetFreeNodeAddr();
+
+            if(nodeAddr != 0)
+            {
+                return nodeAddr;
+            }
+            return CreateFreeNodeAddr();
+        }
+
+        public static bool TryToReserveNodeSpace()
+        {
+            return GetOrCreateFreeNodeSpace() != 0;
+        }
+
         /// <returns>Stored node's address or 0, if no space left.</returns>
         public static ushort Store(Node node)
         {
             Debug.Assert(node != null);
 
-            var nodeAddr = GetFreeNodeAddr();
+            var nodeAddr = GetOrCreateFreeNodeSpace();
 
             if(nodeAddr == 0)
             {
-                nodeAddr = CreateFreeNodeAddr();
-                if(nodeAddr == 0)
-                {
-                    return 0;
-                }
+                return 0;
             }
+
             Node.Store(nodeAddr, node);
             return nodeAddr;
         }

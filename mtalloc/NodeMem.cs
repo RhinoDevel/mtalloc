@@ -273,6 +273,26 @@ namespace mtalloc
             Node.Store(unallocatedNodeAddr, cur);
         }
 
+        public static void LimitLastFreeNodeToSingle()
+        {
+            var firstNode = Node.Load(_firstNodeAddr);
+
+
+            ushort blockAddrCand =
+                (ushort)(firstNode.BlockAddr - Node.NodeLen),
+                newBlockAddr = 0;
+
+            while(
+                blockAddrCand < firstNode.BlockAddr 
+                && Mem.LoadWord(blockAddrCand) == Node.FreeFlagWord)
+            {
+                newBlockAddr = blockAddrCand;
+                blockAddrCand -= Node.NodeLen;
+            }
+
+            throw new NotImplementedException(); // MT_TODO: TEST: Implement!
+        }
+
         /// <summary>
         /// Occupy heap space with one Node object that reserves the whole rest
         /// of heap space as one single unallocated node.

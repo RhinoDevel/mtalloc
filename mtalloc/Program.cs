@@ -44,6 +44,8 @@ namespace mtalloc
             {
                 NodeMem.MergeUnallocatedWithNextIfPossible(cur.LastNodeAddr);
             }
+
+            NodeMem.LimitLastFreeNodeToSingle();
         }
 
         private static ushort Alloc(ushort wantedLen)

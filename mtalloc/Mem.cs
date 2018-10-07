@@ -39,6 +39,16 @@ namespace mtalloc
             return _mem[addr];
         }
 
+        public static void Clear(ushort addr, ushort len, byte val = 0)
+        {
+            var lim = addr + len;
+
+            for(var cur = addr;cur < lim; ++cur)
+            {
+                StoreByte(cur, val);
+            }
+        }
+
         public static void Print()
         {
             const ushort columns = 16;

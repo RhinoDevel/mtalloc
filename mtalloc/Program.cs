@@ -35,6 +35,10 @@ namespace mtalloc
             cur.IsAllocated = 0;
             Node.Store(nodeAddr, cur);
 
+#if DEBUG
+            Mem.Clear(cur.BlockAddr, cur.BlockLen, 0xCD);
+#endif //DEBUG
+
             if(cur.NextNodeAddr != 0)
             {
                 NodeMem.MergeUnallocatedWithNextIfPossible(nodeAddr);
@@ -45,7 +49,7 @@ namespace mtalloc
                 NodeMem.MergeUnallocatedWithNextIfPossible(cur.LastNodeAddr);
             }
 
-            NodeMem.LimitLastFreeNodeToSingle();
+            NodeMem.LimitFreeNodes();
         }
 
         private static ushort Alloc(ushort wantedLen)
@@ -140,9 +144,22 @@ namespace mtalloc
                 Mem.StoreByte(i, 204);
             }
 
-            Free(b);
+            Mem.Print();
+            Console.WriteLine("-");
+
             Free(c);
+
+            Mem.Print();
+            Console.WriteLine("-");
+
             Free(a);
+
+            Mem.Print();
+            Console.WriteLine("-");
+
+            Free(b);
+
+            Mem.Print();
         }
     }
 }

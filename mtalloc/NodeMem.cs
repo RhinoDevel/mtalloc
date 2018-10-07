@@ -273,24 +273,65 @@ namespace mtalloc
             Node.Store(unallocatedNodeAddr, cur);
         }
 
-        public static void LimitLastFreeNodeToSingle()
+        private static ushort GetLastFreeNodeCount()
         {
-            var firstNode = Node.Load(_firstNodeAddr);
+            Debug.Assert(Mem.LoadWord(_firstNodeAddr) != Node.FreeFlagWord);
 
+            ushort retVal = 0xFFFF/*ushort.MaxValue*/,
+                addr = GetFirstBlockAddr();
 
-            ushort blockAddrCand =
-                (ushort)(firstNode.BlockAddr - Node.NodeLen),
-                newBlockAddr = 0;
-
-            while(
-                blockAddrCand < firstNode.BlockAddr 
-                && Mem.LoadWord(blockAddrCand) == Node.FreeFlagWord)
+            do
             {
-                newBlockAddr = blockAddrCand;
-                blockAddrCand -= Node.NodeLen;
+                ++retVal;
+
+                addr -= Node.NodeLen;
+            } while (Mem.LoadWord(addr) == Node.FreeFlagWord);
+
+            return retVal;
+        }
+       
+        public static void LimitFreeNodes()
+        {
+            // ??????????????????|FFFF??????????????|*
+            // ^                  ^                  ^
+            // |                  |                  |
+            // _firstNodeAddr     |                  first block's address
+            // OR                 Last free node's address
+            // last non-free
+            // node's address
+
+            var firstNode = Node.Load(_firstNodeAddr);
+            ushort c = 0;
+
+            if(firstNode.IsAllocated != 0)
+            {
+                Debug.WriteLine(
+                    "NodeMem.LimitFreeNodes : Warning:"
+                    + " First node is allocated.");
+                return;
             }
 
-            throw new NotImplementedException(); // MT_TODO: TEST: Implement!
+            c = GetLastFreeNodeCount();
+            if(c < 2)
+            {
+                return; // Nothing to do (keep one free node, if existing).
+            }
+            --c; // Keep a single free node.
+
+            _maxNodeCount -= c;
+            firstNode.BlockLen += (ushort)(c * Node.NodeLen); 
+            firstNode.BlockAddr = GetFirstBlockAddr();
+
+            Debug.Assert(
+                Mem.LoadWord(firstNode.BlockAddr) == Node.FreeFlagWord);
+
+            Node.Store(_firstNodeAddr, firstNode);
+
+            Debug.Assert(GetLastFreeNodeCount() == 1);
+
+#if DEBUG
+            Mem.Clear(firstNode.BlockAddr, firstNode.BlockLen, 0xDE);
+#endif //DEBUG
         }
 
         /// <summary>

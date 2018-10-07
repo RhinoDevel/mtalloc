@@ -59,6 +59,11 @@ namespace mtalloc
             Node n = null,
                 newNode = null;
             
+            if(wantedLen == 0)
+            {
+                return 0;
+            }
+
             // Make sure that there is a node space available, first
             // (and maybe frees space from first node, which must
             // be done BEFORE first node may gets selected as
@@ -122,28 +127,29 @@ namespace mtalloc
         static void Main(string[] args)
         {
             NodeMem.Init();
-            
+
+            var all = Alloc(Mem.HeapLen - 2 * Node.NodeLen);
+
+            Mem.Clear(all, Mem.HeapLen - 2 * Node.NodeLen, 0xBC);
+
+            Mem.Print();
+            Console.WriteLine("***");
+
+            Free(all);
+            all = 0;
+
             var a = Alloc(10);
 
-            for(ushort i = a;i < a + 10;++i)
-            {
-                Mem.StoreByte(i, 170);
-            }
-
+            Mem.Clear(a, 10, 170);
+            
             var b = Alloc(5);
 
-            for(ushort i = b;i < b + 5;++i)
-            {
-                Mem.StoreByte(i, 187);
-            }
+            Mem.Clear(b, 5, 187);
             
             var c = Alloc(7);
 
-            for(ushort i = c;i < c + 7;++i)
-            {
-                Mem.StoreByte(i, 204);
-            }
-
+            Mem.Clear(c, 7, 204);
+            
             Mem.Print();
             Console.WriteLine("-");
 
@@ -152,12 +158,12 @@ namespace mtalloc
             Mem.Print();
             Console.WriteLine("-");
 
-            Free(a);
+            Free(b);
 
             Mem.Print();
             Console.WriteLine("-");
 
-            Free(b);
+            Free(a);
 
             Mem.Print();
         }

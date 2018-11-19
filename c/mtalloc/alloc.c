@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "node.h"
+#include "mem.h"
 #include "nodemem.h"
 #include "alloc.h"
 
@@ -127,4 +128,10 @@ uint16_t alloc_alloc(uint16_t const wanted_len)
     }
 
     return new_node.block_addr;
+}
+
+void alloc_init(uint8_t * const heap, uint16_t const heap_len)
+{
+    mem_init(heap, heap_len);
+    nodemem_init();
 }

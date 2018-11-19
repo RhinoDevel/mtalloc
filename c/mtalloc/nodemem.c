@@ -143,8 +143,6 @@ bool nodemem_try_to_reserve_node_space()
     return get_or_create_free_node_space() != 0;
 }
 
-/** Returns stored node's address or 0, if no space left.
- */
 uint16_t nodemem_store(struct node const * const n)
 {
     // Debug.Assert(node != null);
@@ -160,11 +158,6 @@ uint16_t nodemem_store(struct node const * const n)
     return node_addr;
 }
 
-/** Returns address of node with unallocated block of sufficient size to hold
- *  given/wanted amount of bytes.
- *
- *  Returns 0, if no such node was found.
- */
 uint16_t nodemem_get_alloc_node_addr(uint16_t const wanted_len)
 {
     // Debug.Assert(wantedLen > 0);

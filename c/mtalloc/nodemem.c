@@ -346,7 +346,7 @@ void nodemem_init()
     first_block_addr = get_first_block_addr();
     first_block_len = g_mem_heap_len - NODE_LEN;
 
-    first_node.last_node_addr = 0,
+    first_node.last_node_addr = 0;
     first_node.block_addr = first_block_addr;
     first_node.block_len = first_block_len;
     first_node.is_allocated = 0;

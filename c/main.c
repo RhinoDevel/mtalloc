@@ -6,6 +6,7 @@
 
 #include "mtalloc/alloc.h"
 #include "mtalloc/node.h"
+#include "mtalloc/mem.h"
 
 extern uint16_t g_mem_heap_len;
 
@@ -18,7 +19,7 @@ int main()
 
     uint16_t all = alloc_alloc(g_mem_heap_len - 2 * NODE_LEN);
 
-    //Mem.Clear(all, Mem.HeapLen - 2 * Node.NodeLen, 0xBC);
+    mem_clear(all, g_mem_heap_len - 2 * NODE_LEN, 0xBC);
 
     // Mem.Print();
     // Console.WriteLine("***");
@@ -28,15 +29,15 @@ int main()
 
     uint16_t a = alloc_alloc(10);
 
-    // Mem.Clear(a, 10, 170);
+    mem_clear(a, 10, 170);
 
     uint16_t b = alloc_alloc(5);
 
-    // Mem.Clear(b, 5, 187);
+    mem_clear(b, 5, 187);
 
     uint16_t c = alloc_alloc(7);
 
-    // Mem.Clear(c, 7, 204);
+    mem_clear(c, 7, 204);
 
     // Mem.Print();
     // Console.WriteLine("-");

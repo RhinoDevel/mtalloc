@@ -57,7 +57,7 @@ static uint16_t get_free_node_addr()
 
 static uint16_t get_first_block_node_addr()
 {
-    return get_first_block_node_addr(get_first_block_addr());
+    return nodemem_get_block_node_addr(get_first_block_addr());
 }
 
 static uint16_t create_free_node_addr()

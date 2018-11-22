@@ -14,6 +14,6 @@ uint8_t mem_load_byte(uint16_t const addr);
 
 /** Initialize singleton.
  */
-void mem_init(uint8_t * const heap, uint16_t const heap_len);
+void mem_init(uint8_t * const mem, uint16_t const mem_len);
 
 #endif //MT_MEM

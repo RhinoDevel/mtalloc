@@ -6,35 +6,42 @@
 #include "mem.h"
 
 uint16_t const g_mem_addr_first = 8; // Must not be 0?! Stupid..
+
+static uint8_t * s_mem = 0;
+static uint16_t s_mem_len = 0;
+
 uint16_t g_mem_heap_len = 0;
 
-static uint8_t * s_heap = 0;
-static uint16_t s_heap_len = 0;
+static void fill(uint16_t val, uint8_t * const low, uint8_t * const high)
+{
+    *low = (uint8_t)(val & 0xFF);
+    *high = (uint8_t)(val >> 8);
+}
 
 void mem_store_word(uint16_t const addr, uint16_t const val)
 {
-    // MT_TODO: TEST: Implement!
+    fill(val, s_mem + addr, s_mem + addr + 1);
 }
 
 uint16_t mem_load_word(uint16_t const addr)
 {
-    return 0; // MT_TODO: TEST: Implement!
+    return (uint16_t)(s_mem[addr] | (s_mem[addr + 1] << 8));
 }
 
 void mem_store_byte(uint16_t const addr, uint8_t const val)
 {
-    // MT_TODO: TEST: Implement!
+    s_mem[addr] = val;
 }
 
 uint8_t mem_load_byte(uint16_t const addr)
 {
-    return 0; // MT_TODO: TEST: Implement!
+    return s_mem[addr];
 }
 
-void mem_init(uint8_t * const heap, uint16_t const heap_len)
+void mem_init(uint8_t * const mem, uint16_t const mem_len)
 {
-    s_heap = heap;
-    s_heap_len = heap_len;
+    s_mem = mem;
+    s_mem_len = mem_len;
 
-    g_mem_heap_len = s_heap_len - g_mem_addr_first;
+    g_mem_heap_len = s_mem_len - g_mem_addr_first;
 }

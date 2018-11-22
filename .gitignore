@@ -1,3 +1,6 @@
 .vs/**/**
 mtalloc/bin/**/**
 mtalloc/obj/**/**
+c/mtalloc_sample
+c/*.o
+c/mtalloc/*.o

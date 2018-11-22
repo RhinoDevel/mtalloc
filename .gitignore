@@ -4,3 +4,4 @@ mtalloc/obj/**/**
 c/mtalloc_sample
 c/*.o
 c/mtalloc/*.o
+c/nbproject

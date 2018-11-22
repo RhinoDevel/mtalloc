@@ -130,8 +130,8 @@ uint16_t alloc_alloc(uint16_t const wanted_len)
     return new_node.block_addr;
 }
 
-void alloc_init(uint8_t * const heap, uint16_t const heap_len)
+void alloc_init(uint8_t * const mem, uint16_t const mem_len)
 {
-    mem_init(heap, heap_len);
+    mem_init(mem, mem_len);
     nodemem_init();
 }

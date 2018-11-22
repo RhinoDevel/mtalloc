@@ -14,6 +14,10 @@ uint8_t mem_load_byte(uint16_t const addr);
 
 void mem_clear(uint16_t const addr, uint16_t const len, uint8_t const val);
 
+#ifndef NDEBUG
+void mem_print();
+#endif //NDEBUG
+
 /** Initialize singleton.
  */
 void mem_init(uint8_t * const mem, uint16_t const mem_len);

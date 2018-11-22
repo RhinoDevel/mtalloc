@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifndef NDEBUG
+#include <stdio.h>
+#endif //NDEBUG
+
 #include "mem.h"
 
 uint16_t const g_mem_addr_first = 8; // Must not be 0?! Stupid..
@@ -47,6 +51,47 @@ void mem_clear(uint16_t const addr, uint16_t const len, uint8_t const val)
         mem_store_byte(cur, val);
     }
 }
+
+#ifndef NDEBUG
+void mem_print()
+{
+    // MT_TODO: TEST: Implement!
+    //
+    // uint16_t const columns = 16;
+    //
+    // // Debug.Assert(columns < 256);
+    //
+    // {
+    //     var rowStrings = new string[columns];
+    //
+    //     for(ushort i = 0;i < columns;++i)
+    //     {
+    //         rowStrings[i] = string.Format("{0:X2}", i);
+    //     }
+    //     Console.WriteLine(string.Join(" ", rowStrings));
+    // }
+    //
+    // for(ushort i = 0;i < _memLen; i += columns)
+    // {
+    //     var rowAddr = i;
+    //     var rowStrings = new string[columns];
+    //
+    //     for(ushort j = 0;j < columns; ++j)
+    //     {
+    //         var colAddr = rowAddr + j;
+    //
+    //         if(colAddr == _memLen)
+    //         {
+    //             break;
+    //         }
+    //         Debug.Assert(colAddr <  _memLen);
+    //
+    //         rowStrings[j] = string.Format("{0:X2}", _mem[colAddr]);
+    //     }
+    //     Console.WriteLine(string.Join(" ", rowStrings));
+    // }
+}
+#endif //NDEBUG
 
 void mem_init(uint8_t * const mem, uint16_t const mem_len)
 {

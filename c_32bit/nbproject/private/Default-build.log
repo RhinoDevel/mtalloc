@@ -1,0 +1,6 @@
+gcc -c -g -std=gnu11 -Wall main.c -o main.o
+gcc -c -g -std=gnu11 -Wall mtalloc/alloc.c -o mtalloc/alloc.o
+gcc -c -g -std=gnu11 -Wall mtalloc/mem.c -o mtalloc/mem.o
+gcc -c -g -std=gnu11 -Wall mtalloc/node.c -o mtalloc/node.o
+gcc -c -g -std=gnu11 -Wall mtalloc/nodemem.c -o mtalloc/nodemem.o
+gcc  main.o mtalloc/alloc.o mtalloc/mem.o mtalloc/node.o mtalloc/nodemem.o -o mtalloc_sample

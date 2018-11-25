@@ -59,7 +59,7 @@ void mem_print()
     //
     // uint16_t const columns = 16;
     //
-    // // Debug.Assert(columns < 256);
+    // assert(columns < 256);
     //
     // {
     //     var rowStrings = new string[columns];
@@ -84,7 +84,7 @@ void mem_print()
     //         {
     //             break;
     //         }
-    //         Debug.Assert(colAddr <  _memLen);
+    //         assert(colAddr <  _memLen);
     //
     //         rowStrings[j] = string.Format("{0:X2}", _mem[colAddr]);
     //     }

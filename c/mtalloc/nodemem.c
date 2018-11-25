@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "nodemem.h"
 #include "mem.h"
@@ -17,8 +18,8 @@ static uint16_t s_first_node_addr = 0; // First node's address.
 
 static uint16_t get_first_block_addr()
 {
-    // Debug.Assert(_firstNodeAddr == Mem.AddrFirst);
-    // Debug.Assert(_maxNodeCount > 0);
+    assert(s_first_node_addr == g_mem_addr_first);
+    assert(s_max_node_count > 0);
 
     // First block begins behind last node.
 
@@ -29,18 +30,18 @@ static uint16_t get_first_block_addr()
  */
 static void mark_node_space_as_free(uint16_t const node_addr)
 {
-    // Debug.Assert(_firstNodeAddr == Mem.AddrFirst);
-    // Debug.Assert(nodeAddr >= _firstNodeAddr);
-    // Debug.Assert(nodeAddr <= GetFirstBlockAddr());
-    // Debug.Assert((nodeAddr - _firstNodeAddr) % Node.NodeLen == 0);
+    assert(s_first_node_addr == g_mem_addr_first);
+    assert(node_addr >= s_first_node_addr);
+    assert(node_addr <= get_first_block_addr());
+    assert((node_addr - s_first_node_addr) % NODE_LEN == 0);
 
     mem_store_word(node_addr, NODE_FREE_FLAG_WORD);
 }
 
 static uint16_t get_free_node_addr()
 {
-    // Debug.Assert(_maxNodeCount > 0);
-    // Debug.Assert(_firstNodeAddr == Mem.AddrFirst);
+    assert(s_max_node_count > 0);
+    assert(s_first_node_addr == g_mem_addr_first);
 
     for(uint16_t i = 0;i < s_max_node_count; ++i)
     {
@@ -62,7 +63,7 @@ static uint16_t get_first_block_node_addr()
 
 static uint16_t create_free_node_addr()
 {
-    // Debug.Assert(GetFreeNodeAddr() == 0);
+    assert(get_free_node_addr() == 0);
 
     uint16_t const first_block_node_addr = get_first_block_node_addr();
     struct node first_block_node;
@@ -93,7 +94,7 @@ static uint16_t create_free_node_addr()
     ++s_max_node_count;
     mark_node_space_as_free(free_node_addr);
 
-    // Debug.Assert(GetFreeNodeAddr() == freeNodeAddr);
+    assert(get_free_node_addr() == free_node_addr);
     return free_node_addr;
 }
 
@@ -110,9 +111,9 @@ static uint16_t get_or_create_free_node_space()
 
 uint16_t nodemem_get_block_node_addr(uint16_t const block_addr)
 {
-    // Debug.Assert(blockAddr > 0);
-    // Debug.Assert(_maxNodeCount > 0);
-    // Debug.Assert(_firstNodeAddr == Mem.AddrFirst);
+    assert(block_addr > 0);
+    assert(s_max_node_count > 0);
+    assert(s_first_node_addr == g_mem_addr_first);
 
     uint16_t ret_val = 0;
 
@@ -134,7 +135,7 @@ uint16_t nodemem_get_block_node_addr(uint16_t const block_addr)
             break;
         }
     }
-    // Debug.Assert(retVal > 0 && retVal < 0xFFFF);//ushort.MaxValue);
+    assert(ret_val > 0 && ret_val < 0xFFFF);//ushort.MaxValue);
     return ret_val;
 }
 
@@ -145,7 +146,7 @@ bool nodemem_try_to_reserve_node_space()
 
 uint16_t nodemem_store(struct node const * const n)
 {
-    // Debug.Assert(node != null);
+    assert(n != 0);
 
     uint16_t const node_addr = get_or_create_free_node_space();
 
@@ -160,7 +161,7 @@ uint16_t nodemem_store(struct node const * const n)
 
 uint16_t nodemem_get_alloc_node_addr(uint16_t const wanted_len)
 {
-    // Debug.Assert(wantedLen > 0);
+    assert(wanted_len > 0);
 
     uint16_t ret_val = 0,
         block_len = 0;
@@ -219,7 +220,7 @@ uint16_t nodemem_get_alloc_node_addr(uint16_t const wanted_len)
 
 static uint16_t get_last_free_node_count()
 {
-    // Debug.Assert(Mem.LoadWord(_firstNodeAddr) != Node.FreeFlagWord);
+    assert(mem_load_word(s_first_node_addr) != NODE_FREE_FLAG_WORD);
 
     uint16_t retVal = 0xFFFF/*ushort.MaxValue*/,
         addr = get_first_block_addr();
@@ -241,7 +242,7 @@ void nodemem_merge_unallocated_with_next_if_possible(
 
     node_fill(unallocated_node_addr, &cur);
 
-    // Debug.Assert(cur->is_allocated == 0);
+    assert(cur.is_allocated == 0);
 
     if(cur.next_node_addr == 0)
     {
@@ -250,7 +251,7 @@ void nodemem_merge_unallocated_with_next_if_possible(
 
     node_fill(cur.next_node_addr, &next);
 
-    // Debug.Assert(cur.BlockAddr + cur.BlockLen == next.BlockAddr);
+    assert(cur.block_addr + cur.block_len == next.block_addr);
 
     if(next.is_allocated != 0)
     {
@@ -265,10 +266,9 @@ void nodemem_merge_unallocated_with_next_if_possible(
 
         node_fill(next.next_node_addr, &next_next_node);
 
-        // Debug.Assert(next_next_node.LastNodeAddr == cur->next_node_addr);
-        // Debug.Assert(next_next_node->is_allocated == 1);
-        // Debug.Assert(
-        //     next.BlockAddr + next.BlockLen == next_next_node.BlockAddr);
+        assert(next_next_node.last_node_addr == cur.next_node_addr);
+        assert(next_next_node.is_allocated == 1);
+        assert(next.block_addr + next.block_len == next_next_node.block_addr);
 
         next_next_node.last_node_addr = unallocated_node_addr;
 
@@ -288,7 +288,7 @@ void nodemem_limit_free_nodes()
     // ??????????????????|FFFF??????????????|*
     // ^                  ^                  ^
     // |                  |                  |
-    // _firstNodeAddr     |                  first block's address
+    // s_first_node_addr     |                  first block's address
     // OR                 Last free node's address
     // last non-free
     // node's address
@@ -317,22 +317,21 @@ void nodemem_limit_free_nodes()
     first_node.block_len += (uint16_t)(c * NODE_LEN);
     first_node.block_addr = get_first_block_addr();
 
-    // Debug.Assert(
-    //     Mem.LoadWord(first_node.BlockAddr) == Node.FreeFlagWord);
+    assert(mem_load_word(first_node.block_addr) == NODE_FREE_FLAG_WORD);
 
     node_store(s_first_node_addr, &first_node);
 
-    // Debug.Assert(GetLastFreeNodeCount() == 1);
+    assert(get_last_free_node_count() == 1);
 
-// #if DEBUG
-//     Mem.Clear(first_node.BlockAddr, first_node->block_len, 0xDE);
-// #endif //DEBUG
+#ifndef NDEBUG
+     mem_clear(first_node.block_addr, first_node.block_len, 0xDE);
+#endif //NDEBUG
 }
 
 void nodemem_init()
 {
-    // Debug.Assert(_maxNodeCount == 0);
-    // Debug.Assert(_firstNodeAddr == 0);
+    assert(s_max_node_count == 0);
+    assert(s_first_node_addr == 0);
 
     uint16_t first_block_addr = 0, first_block_len = 0;
     struct node first_node;

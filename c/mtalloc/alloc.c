@@ -2,6 +2,8 @@
 // RhinoDevel, MT, 2018nov19
 
 #include <stdint.h>
+#include <stdbool.h>
+#include <assert.h>
 
 #include "node.h"
 #include "mem.h"
@@ -15,14 +17,14 @@ void alloc_free(uint16_t const block_addr)
 
     if(block_addr == 0)
     {
-        // //Debug.Assert(false);
+        assert(false);
         return; // Nothing to do.
     }
 
     node_addr = nodemem_get_block_node_addr(block_addr);
     if(node_addr == 0)
     {
-        // Debug.Assert(false);
+        assert(false);
         return; // No block at given (start) address is allocated.
     }
 
@@ -30,16 +32,16 @@ void alloc_free(uint16_t const block_addr)
 
     if(cur.is_allocated == 0)
     {
-        // Debug.Assert(false);
+        assert(false);
         return; // Already deallocated.
     }
 
     cur.is_allocated = 0;
     node_store(node_addr, &cur);
 
-// #if DEBUG
-//     Mem.Clear(cur.BlockAddr, cur.BlockLen, 0xCD);
-// #endif //DEBUG
+#ifndef NDEBUG
+    mem_clear(cur.block_addr, cur.block_len, 0xCD);
+#endif //NDEBUG
 
     if(cur.next_node_addr != 0)
     {
@@ -88,7 +90,7 @@ uint16_t alloc_alloc(uint16_t const wanted_len)
 
     node_fill(node_addr, &n);
 
-    // Debug.Assert(n.is_allocated == 0);
+    assert(n.is_allocated == 0);
 
     if(n.block_len == wanted_len)
     {
@@ -110,7 +112,7 @@ uint16_t alloc_alloc(uint16_t const wanted_len)
     }
     node_fill(node_addr, &n);
 
-    // Debug.Assert(n.block_len > new_node.block_len);
+    assert(n.block_len > new_node.block_len);
 
     n.block_len -= new_node.block_len;
     n.next_node_addr = new_node_addr;

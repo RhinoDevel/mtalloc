@@ -2,6 +2,7 @@
 // RhinoDevel, MT, 2018nov18
 
 #include <stdint.h>
+#include <assert.h>
 
 #include "node.h"
 #include "mem.h"
@@ -13,7 +14,7 @@ void node_fill(uint16_t const node_addr, struct node * const n)
     n->last_node_addr = mem_load_word(addr);
     addr += 2;
 
-    // Debug.Assert(retVal.LastNodeAddr != FreeFlagWord);
+    assert(n->last_node_addr != NODE_FREE_FLAG_WORD);
 
     n->block_addr = mem_load_word(addr);
     addr += 2;

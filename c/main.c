@@ -21,8 +21,8 @@ int main()
 
     mem_clear(all, g_mem_heap_len - 2 * NODE_LEN, 0xBC);
 
-    // Mem.Print();
-    // Console.WriteLine("***");
+    mem_print();
+    printf("***\n");
 
     alloc_free(all);
     all = 0;
@@ -39,24 +39,25 @@ int main()
 
     mem_clear(c, 7, 204);
 
-    // Mem.Print();
-    // Console.WriteLine("-");
+    mem_print();
+    printf("-\n");
 
     alloc_free(c);
     c = 0;
 
-    // Mem.Print();
-    // Console.WriteLine("-");
+    mem_print();
+    printf("-\n");
 
     alloc_free(b);
 
-    // Mem.Print();
-    // Console.WriteLine("-");
+    mem_print();
+    printf("-\n");// Console.WriteLine("-");
 
     alloc_free(a);
 
-    // Mem.Print();
+    mem_print();
 
     free(mem);
+    
     return 0;
 }

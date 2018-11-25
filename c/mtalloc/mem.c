@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #ifndef NDEBUG
+#include <assert.h>
 #include <stdio.h>
 #endif //NDEBUG
 
@@ -54,45 +55,52 @@ void mem_clear(uint16_t const addr, uint16_t const len, uint8_t const val)
 
 #ifndef NDEBUG
 void mem_print()
-{
-    // MT_TODO: TEST: Implement!
-    //
-    // uint16_t const columns = 16;
-    //
-    // assert(columns < 256);
-    //
-    // {
-    //     var rowStrings = new string[columns];
-    //
-    //     for(ushort i = 0;i < columns;++i)
-    //     {
-    //         rowStrings[i] = string.Format("{0:X2}", i);
-    //     }
-    //     Console.WriteLine(string.Join(" ", rowStrings));
-    // }
-    //
-    // for(ushort i = 0;i < _memLen; i += columns)
-    // {
-    //     var rowAddr = i;
-    //     var rowStrings = new string[columns];
-    //
-    //     for(ushort j = 0;j < columns; ++j)
-    //     {
-    //         var colAddr = rowAddr + j;
-    //
-    //         if(colAddr == _memLen)
-    //         {
-    //             break;
-    //         }
-    //         assert(colAddr <  _memLen);
-    //
-    //         rowStrings[j] = string.Format("{0:X2}", _mem[colAddr]);
-    //     }
-    //     Console.WriteLine(string.Join(" ", rowStrings));
-    // }
+{   
+    static uint16_t const columns = 16;
+    
+    assert(columns < 256);
+
+    for(uint16_t i = 0;i < columns;++i)
+    {
+        printf("%2X", i);
+        if(i + 1 < columns)
+        {
+            printf(" ");
+        }
+        else
+        {
+            printf("\n");
+        }
+    }
+
+    for(uint16_t i = 0;i < s_mem_len; i += columns)
+    {
+        uint16_t row_addr = i;
+
+        for(uint16_t j = 0;j < columns; ++j)
+        {
+            uint16_t col_addr = row_addr + j;
+    
+            if(col_addr == s_mem_len)
+            {
+                break;
+            }
+            assert(col_addr <  s_mem_len);
+    
+            printf("%2X", s_mem[col_addr]);
+            if(j + 1 < columns)
+            {
+                printf(" ");
+            }
+            else
+            {
+                printf("\n");
+            }
+        }
+    }
 }
 #endif //NDEBUG
-
+    
 void mem_init(uint8_t * const mem, uint16_t const mem_len)
 {
     s_mem = mem;

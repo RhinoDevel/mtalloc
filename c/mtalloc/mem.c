@@ -62,7 +62,7 @@ void mem_print()
 
     for(uint16_t i = 0;i < columns;++i)
     {
-        printf("%2X", i);
+        printf("%02X", i);
         if(i + 1 < columns)
         {
             printf(" ");
@@ -87,7 +87,7 @@ void mem_print()
             }
             assert(col_addr <  s_mem_len);
     
-            printf("%2X", s_mem[col_addr]);
+            printf("%02X", s_mem[col_addr]);
             if(j + 1 < columns)
             {
                 printf(" ");

@@ -9,25 +9,25 @@
 
 #include "node.h"
 
-uint16_t nodemem_get_block_node_addr(uint16_t const block_addr);
+uint32_t nodemem_get_block_node_addr(uint32_t const block_addr);
 
 bool nodemem_try_to_reserve_node_space();
 
 /** Returns stored node's address or 0, if no space left.
  */
-uint16_t nodemem_store(struct node const * const n);
+uint32_t nodemem_store(struct node const * const n);
 
 /** Returns address of node with unallocated block of sufficient size to hold
  *  given/wanted amount of bytes.
  *
  *  Returns 0, if no such node was found.
  */
-uint16_t nodemem_get_alloc_node_addr(uint16_t const wanted_len);
+uint32_t nodemem_get_alloc_node_addr(uint32_t const wanted_len);
 
 /** Node at given address must be unallocated!
  */
 void nodemem_merge_unallocated_with_next_if_possible(
-    uint16_t const unallocated_node_addr);
+    uint32_t const unallocated_node_addr);
 
 void nodemem_limit_free_nodes();
 

@@ -10,9 +10,9 @@
 #include "nodemem.h"
 #include "alloc.h"
 
-void alloc_free(uint16_t const block_addr)
+void alloc_free(uint32_t const block_addr)
 {
-    uint16_t node_addr = 0;
+    uint32_t node_addr = 0;
     struct node cur;
 
     if(block_addr == 0)
@@ -62,9 +62,9 @@ void alloc_free(uint16_t const block_addr)
     nodemem_limit_free_nodes();
 }
 
-uint16_t alloc_alloc(uint16_t const wanted_len)
+uint32_t alloc_alloc(uint32_t const wanted_len)
 {
-    uint16_t new_node_addr = 0, node_addr = 0;
+    uint32_t new_node_addr = 0, node_addr = 0;
     struct node n, new_node;
 
     if(wanted_len == 0)
@@ -103,7 +103,7 @@ uint16_t alloc_alloc(uint16_t const wanted_len)
     new_node.is_allocated = 1;
     new_node.last_node_addr = node_addr;
     new_node.next_node_addr = n.next_node_addr;
-    new_node.block_addr = (uint16_t)(n.block_addr + n.block_len - wanted_len);
+    new_node.block_addr = (uint32_t)(n.block_addr + n.block_len - wanted_len);
 
     new_node_addr = nodemem_store(&new_node);
     if(new_node_addr == 0)
@@ -132,7 +132,7 @@ uint16_t alloc_alloc(uint16_t const wanted_len)
     return new_node.block_addr;
 }
 
-void alloc_init(uint8_t * const mem, uint16_t const mem_len)
+void alloc_init(uint8_t * const mem, uint32_t const mem_len)
 {
     mem_init(mem, mem_len);
     nodemem_init();

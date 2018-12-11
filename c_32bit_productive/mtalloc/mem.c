@@ -24,7 +24,7 @@ void mem_clear(void * const addr, MT_USIGN const len, uint8_t const val)
 #ifndef NDEBUG
 void mem_print(void const * const mem, MT_USIGN const mem_len)
 {   
-    static char const * const f = sizeof(MT_USIGN) > 32 ? "%02lX" : "%02X";
+    static char const * const f = sizeof (MT_USIGN) > 32 ? "%02lX" : "%02X";
     static MT_USIGN const columns = 16;
     uint8_t const * p = (uint8_t const *)mem;
     uint8_t const * const lim = p + mem_len;

@@ -5,7 +5,6 @@
       <df name="mtalloc">
         <in>alloc.c</in>
         <in>mem.c</in>
-        <in>node.c</in>
         <in>nodemem.c</in>
       </df>
       <in>main.c</in>
@@ -63,10 +62,6 @@
         </cTool>
       </item>
       <item path="mtalloc/mem.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="mtalloc/node.c" ex="false" tool="0" flavor2="10">
         <cTool flags="0">
         </cTool>
       </item>

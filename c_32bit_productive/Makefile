@@ -7,7 +7,7 @@ CC=gcc
 #CFLAGS=-c -O3 -std=gnu11 -Wall -DNDEBUG
 CFLAGS=-c -g -std=gnu11 -Wall
 LDFLAGS=
-SOURCES=main.c mtalloc/alloc.c mtalloc/mem.c mtalloc/node.c mtalloc/nodemem.c
+SOURCES=main.c mtalloc/alloc.c mtalloc/mem.c mtalloc/nodemem.c
 
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=mtalloc_sample

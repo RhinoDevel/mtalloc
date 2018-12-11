@@ -5,9 +5,9 @@
       <df name="mtalloc">
         <in>alloc.c</in>
         <in>alloc.h</in>
+        <in>allocconf.h</in>
         <in>mem.c</in>
         <in>mem.h</in>
-        <in>node.c</in>
         <in>node.h</in>
         <in>nodemem.c</in>
         <in>nodemem.h</in>

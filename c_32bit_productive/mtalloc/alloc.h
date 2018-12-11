@@ -6,10 +6,12 @@
 
 #include <stdint.h>
 
-void alloc_free(uint32_t const block_addr);
+#include "allocconf.h"
 
-uint32_t alloc_alloc(uint32_t const wanted_len);
+void alloc_free(void * const block_addr);
 
-void alloc_init(uint8_t * const mem, uint32_t const mem_len);
+void* alloc_alloc(MT_USIGN const wanted_len);
+
+void alloc_init(void * const mem, MT_USIGN const mem_len);
 
 #endif //MT_ALLOC

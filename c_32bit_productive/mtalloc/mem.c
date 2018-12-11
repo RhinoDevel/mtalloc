@@ -2,78 +2,38 @@
 // RhinoDevel, MT, 2018nov18
 
 #include <stdint.h>
+#include <assert.h>
 
 #ifndef NDEBUG
-#include <assert.h>
 #include <stdio.h>
 #endif //NDEBUG
 
 #include "mem.h"
+#include "allocconf.h"
 
-uint32_t const g_mem_addr_first = 8; // Must not be 0?! Stupid..
-
-static uint8_t * s_mem = 0;
-static uint32_t s_mem_len = 0;
-
-uint32_t g_mem_heap_len = 0;
-
-static void fill(uint16_t val, uint8_t * const low, uint8_t * const high)
+void mem_clear(void * const addr, MT_USIGN const len, uint8_t const val)
 {
-    *low = (uint8_t)(val & 0xFF);
-    *high = (uint8_t)(val >> 8);
-}
-
-void mem_store_word(uint32_t const addr, uint16_t const val)
-{
-    fill(val, s_mem + addr, s_mem + addr + 1);
-}
-
-uint16_t mem_load_word(uint32_t const addr)
-{
-    return (uint16_t)(s_mem[addr] | (s_mem[addr + 1] << 8));
-}
-
-void mem_store_dword(uint32_t const addr, uint32_t const val)
-{
-    mem_store_word(addr, (uint16_t)(val & 0xFFFF));
-    mem_store_word(addr + 2, (uint16_t)(val >> 16));
-}
-
-uint32_t mem_load_dword(uint32_t const addr)
-{
-    return (uint32_t)(mem_load_word(addr) | (mem_load_word(addr + 2) << 16));
-}
-
-void mem_store_byte(uint32_t const addr, uint8_t const val)
-{
-    s_mem[addr] = val;
-}
-
-uint8_t mem_load_byte(uint32_t const addr)
-{
-    return s_mem[addr];
-}
-
-void mem_clear(uint32_t const addr, uint32_t const len, uint8_t const val)
-{
-    uint32_t const lim = addr + len;
-
-    for(uint32_t cur = addr;cur < lim; ++cur)
+    uint8_t * const p = (uint8_t*)addr;
+    
+    for(MT_USIGN i = 0;i < len; ++i)
     {
-        mem_store_byte(cur, val);
+        p[i] = val;
     }
 }
 
 #ifndef NDEBUG
-void mem_print()
+void mem_print(void const * const mem, MT_USIGN const mem_len)
 {   
-    static uint32_t const columns = 16;
+    static char const * const f = sizeof(MT_USIGN) > 32 ? "%02lX" : "%02X";
+    static MT_USIGN const columns = 16;
+    uint8_t const * p = (uint8_t const *)mem;
+    uint8_t const * const lim = p + mem_len;
     
     assert(columns < 256);
 
-    for(uint32_t i = 0;i < columns;++i)
+    for(MT_USIGN i = 0;i < columns;++i)
     {
-        printf("%02X", i);
+        printf(f, i);
         if(i + 1 < columns)
         {
             printf(" ");
@@ -84,22 +44,20 @@ void mem_print()
         }
     }
 
-    for(uint32_t i = 0;i < s_mem_len; i += columns)
+    while(p < lim)
     {
-        uint32_t row_addr = i;
-
-        for(uint32_t j = 0;j < columns; ++j)
+        uint8_t const * row_lim = p + columns;
+        
+        if(row_lim > lim)
         {
-            uint32_t col_addr = row_addr + j;
-    
-            if(col_addr == s_mem_len)
-            {
-                break;
-            }
-            assert(col_addr <  s_mem_len);
-    
-            printf("%02X", s_mem[col_addr]);
-            if(j + 1 < columns)
+            row_lim = lim;
+        }
+        
+        while(p < row_lim)
+        {
+            printf(f, *p);
+            
+            if(p + 1 < row_lim)
             {
                 printf(" ");
             }
@@ -107,15 +65,9 @@ void mem_print()
             {
                 printf("\n");
             }
+            
+            ++p;
         }
     }
 }
 #endif //NDEBUG
-    
-void mem_init(uint8_t * const mem, uint32_t const mem_len)
-{
-    s_mem = mem;
-    s_mem_len = mem_len;
-
-    g_mem_heap_len = s_mem_len - g_mem_addr_first;
-}

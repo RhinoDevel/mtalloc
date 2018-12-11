@@ -9,11 +9,11 @@
 #include "mem.h"
 #include "nodemem.h"
 #include "alloc.h"
+#include "allocconf.h"
 
-void alloc_free(uint32_t const block_addr)
+void alloc_free(void * const block_addr)
 {
-    uint32_t node_addr = 0;
-    struct node cur;
+    struct node * n = 0;
 
     if(block_addr == 0)
     {
@@ -21,51 +21,47 @@ void alloc_free(uint32_t const block_addr)
         return; // Nothing to do.
     }
 
-    node_addr = nodemem_get_block_node_addr(block_addr);
-    if(node_addr == 0)
+    n = nodemem_get_block_node_addr(block_addr);
+    if(n == 0)
     {
         assert(false);
         return; // No block at given (start) address is allocated.
     }
 
-    node_fill(node_addr, &cur);
-
-    if(cur.is_allocated == 0)
+    if(n->is_allocated == 0)
     {
         assert(false);
         return; // Already deallocated.
     }
 
-    cur.is_allocated = 0;
-    node_store(node_addr, &cur);
+    n->is_allocated = 0;
 
 #ifndef NDEBUG
-    mem_clear(cur.block_addr, cur.block_len, 0xCD);
+    mem_clear(n->block_addr, n->block_len, MT_ALLOC_DEB_CLR_4);
 #endif //NDEBUG
 
-    if(cur.next_node_addr != 0)
+    if(n->next_node_addr != 0)
     {
-        nodemem_merge_unallocated_with_next_if_possible(node_addr);
+        nodemem_merge_unallocated_with_next_if_possible(n);
     }
-    if(cur.last_node_addr != 0)
+    if(n->last_node_addr != 0)
     {
-        struct node last;
+        struct node * last = n->last_node_addr;
 
-        node_fill(cur.last_node_addr, &last);
-
-        if(last.is_allocated == 0)
+        if(last->is_allocated == 0)
         {
-            nodemem_merge_unallocated_with_next_if_possible(cur.last_node_addr);
+            nodemem_merge_unallocated_with_next_if_possible(n->last_node_addr);
         }
     }
 
     nodemem_limit_free_nodes();
 }
 
-uint32_t alloc_alloc(uint32_t const wanted_len)
+void* alloc_alloc(MT_USIGN const wanted_len)
 {
-    uint32_t new_node_addr = 0, node_addr = 0;
-    struct node n, new_node;
+    struct node * new_node_addr = 0,
+        * node_addr = 0,
+        new_node;
 
     if(wanted_len == 0)
     {
@@ -88,52 +84,43 @@ uint32_t alloc_alloc(uint32_t const wanted_len)
         return 0;
     }
 
-    node_fill(node_addr, &n);
+    assert(node_addr->is_allocated == 0);
 
-    assert(n.is_allocated == 0);
-
-    if(n.block_len == wanted_len)
+    if(node_addr->block_len == wanted_len)
     {
-        n.is_allocated = 1;
-        node_store(node_addr, &n);
-        return n.block_addr;
+        node_addr->is_allocated = 1;
+
+        return node_addr->block_addr;
     }
 
     new_node.block_len = wanted_len;
     new_node.is_allocated = 1;
     new_node.last_node_addr = node_addr;
-    new_node.next_node_addr = n.next_node_addr;
-    new_node.block_addr = (uint32_t)(n.block_addr + n.block_len - wanted_len);
+    new_node.next_node_addr = node_addr->next_node_addr;
+    new_node.block_addr = node_addr->block_addr + node_addr->block_len - wanted_len;
 
     new_node_addr = nodemem_store(&new_node);
     if(new_node_addr == 0)
     {
         return 0;
     }
-    node_fill(node_addr, &n);
 
-    assert(n.block_len > new_node.block_len);
+    assert(node_addr->block_len > new_node.block_len);
 
-    n.block_len -= new_node.block_len;
-    n.next_node_addr = new_node_addr;
-    node_store(node_addr, &n);
+    node_addr->block_len -= new_node.block_len;
+    node_addr->next_node_addr = new_node_addr;
 
     if (new_node.next_node_addr != 0)
     {
-        struct node next_node;
+        struct node * const next_node = new_node.next_node_addr;
 
-        node_fill(new_node.next_node_addr, &next_node);
-
-        next_node.last_node_addr = new_node_addr;
-
-        node_store(new_node.next_node_addr, &next_node);
+        next_node->last_node_addr = new_node_addr;
     }
 
     return new_node.block_addr;
 }
 
-void alloc_init(uint8_t * const mem, uint32_t const mem_len)
+void alloc_init(void * const mem, MT_USIGN const mem_len)
 {
-    mem_init(mem, mem_len);
-    nodemem_init();
+    nodemem_init(mem, mem_len);
 }
